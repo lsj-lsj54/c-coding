@@ -1,0 +1,6 @@
+id=007
+name=lsj
+min_num=5
+max_num=100
+waiting_time=100
+destroy_time=60

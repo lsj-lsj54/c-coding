@@ -1,0 +1,7 @@
+<Solution>
+  <Configurations>
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Project Path="lsj_pool.vcxproj" Id="8b996b17-f393-462c-bc8d-4aa854e89201" />
+</Solution>
