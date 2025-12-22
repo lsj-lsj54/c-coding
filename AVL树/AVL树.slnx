@@ -1,0 +1,7 @@
+<Solution>
+  <Configurations>
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Project Path="AVL树.vcxproj" Id="1c46f2dd-bcab-4a26-bbb2-89b90ad6f28e" />
+</Solution>
