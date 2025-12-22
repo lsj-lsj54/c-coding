@@ -1,0 +1,7 @@
+<Solution>
+  <Configurations>
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Project Path="My_ngx.vcxproj" Id="f3f612a1-15d6-43f3-a7c7-f8b5e04d74e9" />
+</Solution>
