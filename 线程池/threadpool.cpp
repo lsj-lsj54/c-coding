@@ -19,7 +19,13 @@ ThreadPool::ThreadPool()
 {}
 
 ThreadPool::~ThreadPool()
-{}
+{
+	isPoolRunning_ = false;
+	notEmpty_.notify_all();
+	//等待线程池里面所有的线程返回  有两种状态：阻塞 & 正在执行任务中
+	std::unique_lock lock(taskQueMtx_);
+	exitCond_.wait(lock, [&]()->bool {return threads_.size() == 0; });
+}
 
 bool ThreadPool::checkRunningState()const
 {
@@ -120,7 +126,7 @@ void ThreadPool::threadFunc(int threadid)//线程函数返回 相应的线程也就结束了
 {
 	auto lastTime = std::chrono::high_resolution_clock().now();
 
-	for (;;)
+	while (isPoolRunning_)
 	{
 		std::shared_ptr<Task>task;
 		{
@@ -130,16 +136,16 @@ void ThreadPool::threadFunc(int threadid)//线程函数返回 相应的线程也就结束了
 			//在cached模式下 可能创建很多线程 但是空闲时间超过60s 应该去掉多余的线程
 			//超过初始线程数量的线程要进行回收
 			//当前时间-上次线程执行的时间>60s
-			if (poolMode_ == PoolMode::MODE_CACHED)
+			//每一秒钟返回一次
+			while (taskQue_.size() == 0)
 			{
-				//每一秒钟返回一次
-				while (taskQue_.size() == 0)
+				if (poolMode_ == PoolMode::MODE_CACHED)
 				{
 					//超时返回
-					if(std::cv_status::timeout==
+					if (std::cv_status::timeout ==
 						notEmpty_.wait_for(lock, std::chrono::seconds(1)))
 					{
-						auto now= std::chrono::high_resolution_clock().now();
+						auto now = std::chrono::high_resolution_clock().now();
 						auto dur = std::chrono::duration_cast<std::chrono::seconds>(now - lastTime);
 						if (dur.count() >= THREAD_MAX_IDLE_TIME
 							&& curThreadSize_ > initThreadSize_)
@@ -156,12 +162,22 @@ void ThreadPool::threadFunc(int threadid)//线程函数返回 相应的线程也就结束了
 						}
 					}
 				}
+				else
+				{
+					//等待notempty条件
+					notEmpty_.wait(lock);
+				}
+				//线程池要结束回收线程资源
+				if (!isPoolRunning_)
+				{
+					threads_.erase(threadid);
+					std::cout << "threadid:" << std::this_thread::get_id() << "exit" << std::endl;
+					exitCond_.notify_all();
+					return;
+				}
+
 			}
-			else
-			{
-				//等待notempty条件
-				notEmpty_.wait(lock, [&]()->bool {return taskQue_.size() > 0; });
-			}
+
 
 			--idleThreadSize_;
 			std::cout << std::this_thread::get_id() << "获取任务成功" << std::endl;
@@ -170,7 +186,7 @@ void ThreadPool::threadFunc(int threadid)//线程函数返回 相应的线程也就结束了
 			taskQue_.pop();
 			--taskSize_;
 		}
-		if (!taskQue_.empty())
+		if (!taskQue_.size() > 0)
 		{
 			notEmpty_.notify_all();
 		}
@@ -187,6 +203,9 @@ void ThreadPool::threadFunc(int threadid)//线程函数返回 相应的线程也就结束了
 		lastTime = std::chrono::high_resolution_clock().now();//更新线程执行完任务的时间
 
 	}
+	threads_.erase(threadid);
+	std::cout << "threadid:" << std::this_thread::get_id() << "exit" << std::endl;
+	exitCond_.notify_all();
 }
 
 

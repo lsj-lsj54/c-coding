@@ -176,6 +176,8 @@ private:
 private:
 	//std::vector<std::unique_ptr<Thread>>threads_;//线程列表
 	std::unordered_map<int, std::unique_ptr<Thread>>threads_;
+
+
 	size_t initThreadSize_;//初始的线程数量
 	size_t threadSizeThreshHold_; //线程数量上限
 	std::atomic_int curThreadSize_; //线程当前数量
@@ -188,6 +190,7 @@ private:
 	std::mutex taskQueMtx_;//保证任务队列的线程安全
 	std::condition_variable notFull_;//任务队列不满
 	std::condition_variable notEmpty_;//任务队列不空
+	std::condition_variable exitCond_;//等待线程资源全部回收
 
 	PoolMode poolMode_;
 	std::atomic_bool isPoolRunning_;//表示当前线程池的启动状态
