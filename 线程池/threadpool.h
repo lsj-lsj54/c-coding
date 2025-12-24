@@ -25,7 +25,8 @@ public:
 	//这个构造函数可以让Any类型接收任意其他数据
 	template<typename T>
 	Any(T data) :base_(std::make_unique<Derive<T>>(data))
-	{}
+	{
+	}
 	template<typename T>
 	T cast_()
 	{
@@ -51,7 +52,7 @@ private:
 	class Derive :public Base
 	{
 	public:
-		Derive(T data) :data_(data){}
+		Derive(T data) :data_(data) {}
 		T data_;
 	};
 private:
@@ -61,9 +62,10 @@ private:
 class Semaphore
 {
 public:
-	Semaphore(int limit=0)
+	Semaphore(int limit = 0)
 		:resLimit_(limit)
-	{ }
+	{
+	}
 	~Semaphore() = default;
 
 	//获取一个信号量资源
@@ -92,7 +94,7 @@ class Result
 {
 public:
 	Result(std::shared_ptr<Task>task, bool isValid = true);
-	~Result()=default;
+	~Result() = default;
 
 	//问题一： setVal方法，获取任务执行完的返回值
 	void setVal(Any any);
@@ -119,8 +121,9 @@ class Task
 {
 public:
 	Task()
-	:result_(nullptr)
-	{}
+		:result_(nullptr)
+	{
+	}
 	~Task() = default;
 	void exec();
 	void setResult(Result* res);
@@ -134,7 +137,7 @@ class Thread
 {
 public:
 	using ThreadFunc = std::function<void(int)>;
-	
+
 	Thread(ThreadFunc);
 	~Thread();
 	//启动线程
@@ -161,10 +164,10 @@ public:
 	//给线程池提交任务
 	Result submitTask(std::shared_ptr<Task>);
 	//开启线程池
-	void start(int initThreadSize=4);
+	void start(int initThreadSize = 4);
 	//设置线程数量上限
 	void setThreadSizeThreshHold(int);
-	
+
 	ThreadPool(const ThreadPool&) = delete;
 	ThreadPool& operator=(const ThreadPool&) = delete;
 

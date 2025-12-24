@@ -1,0 +1,10 @@
+{
+    "Version": "1.2",
+    "Data": {
+        "Source": "d:\\cjia3-2026\\vc\\tools\\msvc\\14.50.35717\\modules\\std.compat.ixx",
+        "ProvidedModule": "std.compat",
+        "Includes": [],
+        "ImportedModules": [],
+        "ImportedHeaderUnits": []
+    }
+}

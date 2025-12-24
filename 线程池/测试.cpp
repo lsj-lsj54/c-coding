@@ -49,7 +49,6 @@ int main()
 		pool.submitTask(std::make_shared<MyTask>(200000001, 300000000));
 
 
-
 		unsigned long long sum1 = res1.get().cast_<unsigned long long>();//get返回一个Any类型 怎么转成具体类型
 		unsigned long long sum2 = res2.get().cast_<unsigned long long>();
 		unsigned long long sum3 = res3.get().cast_<unsigned long long>();
