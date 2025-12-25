@@ -127,7 +127,7 @@ void ThreadPool::threadFunc(int threadid)//线程函数返回 相应的线程也就结束了
 {
 	auto lastTime = std::chrono::high_resolution_clock().now();
 
-	while (isPoolRunning_)
+	for (;;)
 	{
 		std::shared_ptr<Task>task;
 		{
@@ -138,8 +138,15 @@ void ThreadPool::threadFunc(int threadid)//线程函数返回 相应的线程也就结束了
 			//超过初始线程数量的线程要进行回收
 			//当前时间-上次线程执行的时间>60s
 			//每一秒钟返回一次
-			while (isPoolRunning_ && taskQue_.size() == 0)
+			while (taskQue_.size() == 0)
 			{
+				if (!isPoolRunning_)
+				{
+					threads_.erase(threadid);
+					std::cout << "threadid:" << std::this_thread::get_id() << "exit" << std::endl;
+					exitCond_.notify_all();
+					return;
+				}
 				if (poolMode_ == PoolMode::MODE_CACHED)
 				{
 					//超时返回
@@ -178,12 +185,10 @@ void ThreadPool::threadFunc(int threadid)//线程函数返回 相应的线程也就结束了
 				//}
 
 			}
-			if (!isPoolRunning_)
-			{
-				break;
-			}
-
-
+			//if (!isPoolRunning_)
+			//{
+			//	break;
+			//}
 			--idleThreadSize_;
 			std::cout << std::this_thread::get_id() << "获取任务成功" << std::endl;
 			//从任务队列取个任务出去
@@ -202,15 +207,15 @@ void ThreadPool::threadFunc(int threadid)//线程函数返回 相应的线程也就结束了
 			//task->run();//执行任务 把任务的返回值setVal方法给到Result
 			task->exec();
 		}
+
+
 		++idleThreadSize_;
-
-
 		lastTime = std::chrono::high_resolution_clock().now();//更新线程执行完任务的时间
 
 	}
-	threads_.erase(threadid);
-	std::cout << "threadid:" << std::this_thread::get_id() << "exit" << std::endl;
-	exitCond_.notify_all();
+	//threads_.erase(threadid);
+	//std::cout << "threadid:" << std::this_thread::get_id() << "exit" << std::endl;
+	//exitCond_.notify_all();
 }
 
 
